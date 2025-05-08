@@ -24,7 +24,7 @@ app.use(express.json());
 
 // 路由
 app.use('/api', authRoutes);                          
-app.use('/api/user', verifyToken, userRoutes);      
+app.use('/api/user', verifyToken, userRoutes);     
 
 // 啟動伺服器
 app.listen(PORT, () => {
