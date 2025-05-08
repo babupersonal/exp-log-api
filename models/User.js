@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  name: String,
-  level: Number,
-  exp: Number,
-  nextLevelExp: Number,
+  name: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  level: { type: Number, default: 1 },
+  exp: { type: Number, default: 0 },
+  nextLevelExp: { type: Number, default: 1000 },
   skills: [
     {
       name: String,
@@ -15,5 +16,4 @@ const userSchema = new mongoose.Schema({
 });
 
 const User = mongoose.model('User', userSchema);
-
 module.exports = User;
