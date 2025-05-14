@@ -1,5 +1,6 @@
 // 新增的套件
 const session = require('express-session');
+const app = express();
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('./models/User'); // 確保 User 模型有 googleId 欄位
