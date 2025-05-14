@@ -1,32 +1,61 @@
-// 新增的套件
+// ✅ 套件引入
+const express = require('express');
+const mongoose = require('mongoose');
 const session = require('express-session');
-const app = express();
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const User = require('./models/User'); // 確保 User 模型有 googleId 欄位
+const cors = require('cors');
+require('dotenv').config(); // 載入 .env 設定檔
 
-// session middleware（需放在 app.use(express.json()) 後面）
+// ✅ 自訂模組
+const User = require('./models/User');
+
+// ✅ 建立 Express 應用
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+// ✅ MongoDB 連線
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => {
+  console.log('✅ MongoDB 連線成功');
+}).catch(err => {
+  console.error('❌ MongoDB 連線失敗:', err);
+});
+
+// ✅ 中介軟體 middleware
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
+app.use(express.json());
 app.use(session({
   secret: process.env.SESSION_SECRET || 'supersecret',
   resave: false,
   saveUninitialized: false
 }));
-
-// 初始化 Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
-// 序列化/反序列化
-passport.serializeUser((user, done) => done(null, user._id));
+// ✅ Passport 序列化
+passport.serializeUser((user, done) => {
+  done(null, user._id);
+});
 passport.deserializeUser(async (id, done) => {
-  const user = await User.findById(id);
-  done(null, user);
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
 });
 
+// ✅ Google OAuth Strategy
 passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: process.env.GOOGLE_CALLBACK_URL
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: process.env.GOOGLE_CALLBACK_URL
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let user = await User.findOne({ googleId: profile.id });
@@ -47,22 +76,29 @@ passport.use(new GoogleStrategy({
   }
 }));
 
-// Google OAuth 路由
+// ✅ 路由區塊
+
+// Google OAuth 登入
 app.get('/api/auth/google', passport.authenticate('google', { scope: ['profile'] }));
 
+// Google OAuth 回調
 app.get('/api/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
-    // 登入成功後導回前端首頁（依你前端網址調整）
-    res.redirect('https://exp-log.onrender.com/'); 
+    res.redirect('https://exp-log.onrender.com/'); // ✅ 依你的前端部署網址調整
   }
 );
 
-// 提供前端檢查登入狀態用
+// 回傳登入使用者資料
 app.get('/api/me', (req, res) => {
   if (req.isAuthenticated()) {
     res.json(req.user);
   } else {
     res.status(401).json({ error: '未登入' });
   }
+});
+
+// ✅ 啟動伺服器
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on port ${PORT}`);
 });
