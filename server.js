@@ -5,12 +5,10 @@ const session = require('express-session');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const cors = require('cors');
-require('dotenv').config(); // 載入 .env 設定檔
+require('dotenv').config();
 
-// ✅ 自訂模組
 const User = require('./models/User');
 
-// ✅ 建立 Express 應用
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -51,6 +49,8 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
+console.log('🔍 GOOGLE_CALLBACK_URL =', process.env.GOOGLE_CALLBACK_URL);
+
 // ✅ Google OAuth Strategy
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
@@ -76,8 +76,6 @@ passport.use(new GoogleStrategy({
   }
 }));
 
-console.log('🔍 Google callback URL:', process.env.GOOGLE_CALLBACK_URL);
-
 // Google OAuth 登入
 app.get('/api/auth/google', passport.authenticate('google', { scope: ['profile'] }));
 
@@ -85,7 +83,7 @@ app.get('/api/auth/google', passport.authenticate('google', { scope: ['profile']
 app.get('/api/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
-    res.redirect('https://exp-log.onrender.com'); // ✅ 登入成功導回前端首頁
+    res.redirect('https://exp-log.onrender.com/index');
   }
 );
 
