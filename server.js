@@ -76,7 +76,7 @@ passport.use(new GoogleStrategy({
   }
 }));
 
-// ✅ 路由區塊
+console.log('🔍 Google callback URL:', process.env.GOOGLE_CALLBACK_URL);
 
 // Google OAuth 登入
 app.get('/api/auth/google', passport.authenticate('google', { scope: ['profile'] }));
@@ -85,7 +85,7 @@ app.get('/api/auth/google', passport.authenticate('google', { scope: ['profile']
 app.get('/api/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
-    res.redirect('https://exp-log.onrender.com/'); // ✅ 依你的前端部署網址調整
+    res.redirect('https://exp-log.onrender.com'); // ✅ 登入成功導回前端首頁
   }
 );
 
