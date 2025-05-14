@@ -83,7 +83,7 @@ app.get('/api/auth/google', passport.authenticate('google', { scope: ['profile']
 app.get('/api/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
-    res.redirect('https://exp-log.onrender.com/home');
+    res.redirect('https://exp-log.onrender.com/dashboard');
   }
 );
 
